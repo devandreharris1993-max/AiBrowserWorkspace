@@ -40,3 +40,6 @@ coverage/
 appsettings.*.local.json
 .env
 .env.*
+
+# Local verification captures
+app-verify*.png

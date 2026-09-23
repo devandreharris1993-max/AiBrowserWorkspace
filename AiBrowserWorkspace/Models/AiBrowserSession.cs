@@ -14,9 +14,8 @@ public sealed class AiBrowserSession
     public string DisplayName { get; }
     public AiPlatform Platform { get; }
 
-    // The proxy in effect when this session was created (null if none was active yet).
-    // Since the proxy is process-wide (see IWebProxyService), every session created
-    // afterward shares this same value regardless of what it requests.
+    // Proxy requested for this session. The CEF engine is process-wide, so the last
+    // applied proxy is what page traffic actually uses (see CefProxyApplicator).
     public ProxyEndpoint? Proxy { get; }
 
     public DateTime CreatedAt { get; } = DateTime.Now;

@@ -3,6 +3,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using AiBrowserWorkspace.Models;
+using AiBrowserWorkspace.Services;
 using AiBrowserWorkspace.ViewModels;
 
 namespace AiBrowserWorkspace.Views;
@@ -34,6 +35,7 @@ public partial class BrowserCard : UserControl
         _viewModel = vm;
 
         WebViewControl.BeforeNavigate += OnBeforeNavigate;
+        WebViewControl.BeforeResourceLoad += OnBeforeResourceLoad;
         WebViewControl.Navigated += OnNavigated;
         WebViewControl.LoadFailed += OnLoadFailed;
         WebViewControl.WebViewInitialized += OnWebViewInitialized;
@@ -114,13 +116,20 @@ public partial class BrowserCard : UserControl
 
     // WebViewControl (CEF) raises these on its own engine thread, not the UI thread,
     // so every handler below marshals back via Dispatcher.UIThread before touching the VM.
-    private void OnBeforeNavigate(WebViewControl.Request request) => Dispatcher.UIThread.Post(() =>
+    private void OnBeforeNavigate(WebViewControl.Request request)
     {
-        if (_viewModel is not null)
+        GoogleSignInCompatibility.Apply(request);
+        Dispatcher.UIThread.Post(() =>
         {
-            _viewModel.Status = SessionStatus.Loading;
-        }
-    });
+            if (_viewModel is not null)
+            {
+                _viewModel.Status = SessionStatus.Loading;
+            }
+        });
+    }
+
+    private void OnBeforeResourceLoad(WebViewControl.ResourceHandler resource) =>
+        GoogleSignInCompatibility.Apply(resource);
 
     private void OnNavigated(string url, string frameName) => Dispatcher.UIThread.Post(() =>
     {

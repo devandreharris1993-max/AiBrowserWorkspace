@@ -37,7 +37,7 @@ public sealed class BrowserSessionService : IBrowserSessionService
 
         _proxyService.NotifySessionStarting();
 
-        var session = new AiBrowserSession(Guid.NewGuid(), displayName, platform, _proxyService.ActiveProxy);
+        var session = new AiBrowserSession(Guid.NewGuid(), displayName, platform, proxy ?? _proxyService.ActiveProxy);
         var viewModel = new BrowserSessionViewModel(session, _adapterFactory);
 
         if (proxyResult is { Succeeded: false })

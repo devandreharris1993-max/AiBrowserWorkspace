@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Media;
-using AiBrowserWorkspace.Commands;
 using AiBrowserWorkspace.Models;
 using AiBrowserWorkspace.Services;
 using WebViewControl;
@@ -11,6 +10,7 @@ public sealed class BrowserSessionViewModel : ViewModelBase
 {
     private static readonly IBrush ChatGptAccentBrush = Solid(0x10, 0xA3, 0x7F);
     private static readonly IBrush ClaudeAccentBrush = Solid(0xCC, 0x78, 0x5C);
+    private static readonly IBrush CleverAiHumanizerAccentBrush = Solid(0x3D, 0x8B, 0xF0);
     private static readonly IBrush ReadyBrush = Solid(0x4C, 0xAF, 0x8C);
     private static readonly IBrush BusyBrush = Solid(0xE8, 0xA3, 0x3D);
     private static readonly IBrush ErrorBrush = Solid(0xE0, 0x5A, 0x5A);
@@ -18,7 +18,6 @@ public sealed class BrowserSessionViewModel : ViewModelBase
 
     private readonly IAiSiteAdapterFactory _adapterFactory;
 
-    private string _promptText = string.Empty;
     private bool _isSelected;
     private bool _includeInBroadcast = true;
     private SessionStatus _status = SessionStatus.Initializing;
@@ -29,9 +28,6 @@ public sealed class BrowserSessionViewModel : ViewModelBase
     {
         Session = session;
         _adapterFactory = adapterFactory;
-
-        SendCommand = new AsyncRelayCommand(SendAsync, CanSend);
-        ClearCommand = new RelayCommand(Clear, () => PromptText.Length > 0);
     }
 
     public AiBrowserSession Session { get; }
@@ -43,24 +39,6 @@ public sealed class BrowserSessionViewModel : ViewModelBase
     public Uri HomeUri => Platform.GetHomeUri();
     public ProxyEndpoint? Proxy => Session.Proxy;
     public string ProxyDisplayText => Proxy is null ? "Direct (no proxy)" : $"via {Proxy}";
-
-    public AsyncRelayCommand SendCommand { get; }
-    public RelayCommand ClearCommand { get; }
-
-    public string PromptText
-    {
-        get => _promptText;
-        set
-        {
-            if (SetField(ref _promptText, value))
-            {
-                OnPropertyChanged(nameof(CharacterCount));
-                OnPropertyChanged(nameof(PromptIsEmpty));
-                SendCommand.RaiseCanExecuteChanged();
-                ClearCommand.RaiseCanExecuteChanged();
-            }
-        }
-    }
 
     public bool IsSelected
     {
@@ -94,8 +72,6 @@ public sealed class BrowserSessionViewModel : ViewModelBase
                 OnPropertyChanged(nameof(StatusBrush));
                 OnPropertyChanged(nameof(IsLoadingOverlayVisible));
                 OnPropertyChanged(nameof(HasError));
-                OnPropertyChanged(nameof(SendButtonLabel));
-                SendCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -115,21 +91,11 @@ public sealed class BrowserSessionViewModel : ViewModelBase
     public WebView? BrowserControl
     {
         get => _browserControl;
-        set
-        {
-            if (SetField(ref _browserControl, value))
-            {
-                SendCommand.RaiseCanExecuteChanged();
-            }
-        }
+        set => SetField(ref _browserControl, value);
     }
 
     public bool HasError => Status == SessionStatus.Error && !string.IsNullOrEmpty(ErrorMessage);
     public bool IsLoadingOverlayVisible => Status is SessionStatus.Initializing or SessionStatus.Loading;
-    public bool PromptIsEmpty => string.IsNullOrEmpty(PromptText);
-    public int CharacterCount => PromptText.Length;
-
-    public string SendButtonLabel => Status == SessionStatus.Sending ? "Sending…" : "Send";
 
     public string StatusDisplayText => Status switch
     {
@@ -149,54 +115,44 @@ public sealed class BrowserSessionViewModel : ViewModelBase
         _ => BusyBrush
     };
 
-    public IBrush AccentBrush => Platform == AiPlatform.ChatGpt ? ChatGptAccentBrush : ClaudeAccentBrush;
+    public IBrush AccentBrush => Platform switch
+    {
+        AiPlatform.ChatGpt => ChatGptAccentBrush,
+        AiPlatform.Claude => ClaudeAccentBrush,
+        AiPlatform.CleverAiHumanizer => CleverAiHumanizerAccentBrush,
+        _ => NeutralBorderBrush
+    };
 
     public IBrush CardBorderBrush => IsSelected ? AccentBrush : NeutralBorderBrush;
     public Thickness CardBorderThickness => IsSelected ? new Thickness(2) : new Thickness(1);
 
-    private bool CanSend(object? parameter) =>
-        Status != SessionStatus.Sending &&
-        Status != SessionStatus.Initializing &&
-        !string.IsNullOrWhiteSpace(PromptText) &&
-        _browserControl is not null;
-
-    private Task SendAsync(object? parameter) => SendPromptCoreAsync(PromptText, clearPromptOnSuccess: true);
-
-    // Used by MainViewModel's broadcast: sends an explicit prompt without touching this
-    // session's own draft (PromptText), so a broadcast can never clobber what the user was
-    // mid-typing for this session before the broadcast ran.
-    public Task<bool> SendBroadcastPromptAsync(string prompt, CancellationToken cancellationToken = default) =>
-        SendPromptCoreAsync(prompt, clearPromptOnSuccess: false, cancellationToken);
-
-    private async Task<bool> SendPromptCoreAsync(string prompt, bool clearPromptOnSuccess, CancellationToken cancellationToken = default)
+    public Task<bool> SendBroadcastPromptAsync(string prompt, CancellationToken cancellationToken = default)
     {
         if (_browserControl is null)
         {
             Status = SessionStatus.Error;
             ErrorMessage = "The browser for this session is not ready yet.";
-            return false;
+            return Task.FromResult(false);
         }
 
         if (Status == SessionStatus.Sending)
         {
-            // Already mid-send (e.g. a manual Send racing a broadcast); skip rather than
-            // interleave two prompts into the same composer.
-            return false;
+            return Task.FromResult(false);
         }
 
+        return SendBroadcastCoreAsync(prompt, cancellationToken);
+    }
+
+    private async Task<bool> SendBroadcastCoreAsync(string prompt, CancellationToken cancellationToken)
+    {
         Status = SessionStatus.Sending;
         ErrorMessage = null;
 
         try
         {
             var adapter = _adapterFactory.GetAdapter(Platform);
-            await adapter.SendPromptAsync(_browserControl, prompt, cancellationToken);
+            await adapter.SendPromptAsync(_browserControl!, prompt, cancellationToken);
             Status = SessionStatus.Sent;
-            if (clearPromptOnSuccess)
-            {
-                PromptText = string.Empty;
-            }
-
             return true;
         }
         catch (Exception ex)
@@ -217,16 +173,6 @@ public sealed class BrowserSessionViewModel : ViewModelBase
         if (Status == SessionStatus.Sent)
         {
             Status = SessionStatus.Ready;
-        }
-    }
-
-    private void Clear()
-    {
-        PromptText = string.Empty;
-        if (Status == SessionStatus.Error)
-        {
-            Status = SessionStatus.Ready;
-            ErrorMessage = null;
         }
     }
 

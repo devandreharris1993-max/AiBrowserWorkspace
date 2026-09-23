@@ -24,11 +24,8 @@ public sealed class AddBrowserViewModel : ViewModelBase
         set => SetField(ref _sessionName, value);
     }
 
-    // Every new browser gets its own OS process with its own CEF engine (see
-    // Services/BrowserSessionService.cs), so — unlike the old single-shared-engine
-    // design — a proxy here never affects any other session, and there's nothing to
-    // lock: this is always available.
-    public string ProxyStatusText => "Optional. Only affects this browser.";
+    public string ProxyStatusText =>
+        "Optional. Must be set on the first browser you add; every session in this run then uses it. Restart the app to change it.";
 
     public string ProxyHost
     {

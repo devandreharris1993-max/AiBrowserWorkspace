@@ -3,7 +3,8 @@ namespace AiBrowserWorkspace.Models;
 public enum AiPlatform
 {
     ChatGpt,
-    Claude
+    Claude,
+    CleverAiHumanizer
 }
 
 public static class AiPlatformExtensions
@@ -12,6 +13,7 @@ public static class AiPlatformExtensions
     {
         AiPlatform.ChatGpt => "ChatGPT",
         AiPlatform.Claude => "Claude",
+        AiPlatform.CleverAiHumanizer => "Clever AI Humanizer",
         _ => platform.ToString()
     };
 
@@ -19,6 +21,7 @@ public static class AiPlatformExtensions
     {
         AiPlatform.ChatGpt => new Uri("https://chatgpt.com/"),
         AiPlatform.Claude => new Uri("https://claude.ai/"),
+        AiPlatform.CleverAiHumanizer => new Uri("https://cleverhumanizer.ai/"),
         _ => throw new ArgumentOutOfRangeException(nameof(platform), platform, null)
     };
 }

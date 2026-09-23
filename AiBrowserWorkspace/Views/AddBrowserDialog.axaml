@@ -10,14 +10,17 @@
         <TextBlock Grid.Row="0" Text="Choose a platform" FontWeight="SemiBold" FontSize="14"
                    Foreground="{StaticResource PrimaryTextBrush}" />
 
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,20">
-            <RadioButton Content="ChatGPT" GroupName="Platform" Margin="0,0,24,0"
+        <WrapPanel Grid.Row="1" Margin="0,10,0,20">
+            <RadioButton Content="ChatGPT" GroupName="Platform" Margin="0,0,24,8"
                          Foreground="{StaticResource PrimaryTextBrush}"
                          IsChecked="{Binding SelectedPlatform, Converter={StaticResource EnumEquals}, ConverterParameter=ChatGpt}" />
-            <RadioButton Content="Claude" GroupName="Platform"
+            <RadioButton Content="Claude" GroupName="Platform" Margin="0,0,24,8"
                          Foreground="{StaticResource PrimaryTextBrush}"
                          IsChecked="{Binding SelectedPlatform, Converter={StaticResource EnumEquals}, ConverterParameter=Claude}" />
-        </StackPanel>
+            <RadioButton Content="Clever AI Humanizer" GroupName="Platform" Margin="0,0,0,8"
+                         Foreground="{StaticResource PrimaryTextBrush}"
+                         IsChecked="{Binding SelectedPlatform, Converter={StaticResource EnumEquals}, ConverterParameter=CleverAiHumanizer}" />
+        </WrapPanel>
 
         <TextBlock Grid.Row="2" Text="Session name (optional)" FontWeight="SemiBold" FontSize="14"
                    Foreground="{StaticResource PrimaryTextBrush}" />

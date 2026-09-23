@@ -44,13 +44,36 @@ public partial class App : Application
         WebView.Settings.CachePath = cachePath;
         WebView.Settings.PersistCache = true;
 
-        // Same VMware SVGA3D driver that forced software rendering for Avalonia itself
-        // (see Program.cs) also breaks CEF's own internal GPU/compositor process, which
-        // otherwise renders blank/black tiles instead of page content. Disabling GPU use
-        // inside CEF too mirrors that fix and lets it fall back to software compositing.
-        WebView.Settings.AddCommandLineSwitch("disable-gpu", "1");
-        WebView.Settings.AddCommandLineSwitch("disable-gpu-compositing", "1");
-        WebView.Settings.AddCommandLineSwitch("no-sandbox", "1");
+        // Boolean Chromium switches must be flag-only (--disable-gpu), not --disable-gpu=1:
+        // the latter is ignored, the GPU process still launches, fails, and CEF aborts
+        // with "GPU process isn't usable. Goodbye."
+        //
+        // CEF's GPU work has to stay in this process: the helper
+        // (Xilium.CefGlue.BrowserProcess.exe) ships without a supportedOS
+        // manifest, so a separate GPU process can't create its windows and
+        // Chromium kills the whole app. --disable-gpu-compositing is intentionally
+        // omitted — that flag produces a permanent white page.
+        WebView.Settings.AddCommandLineSwitch("in-process-gpu", null);
+        WebView.Settings.AddCommandLineSwitch("disable-gpu-sandbox", null);
+        WebView.Settings.AddCommandLineSwitch("ignore-gpu-blocklist", null);
+        WebView.Settings.AddCommandLineSwitch("use-angle", "swiftshader");
+        WebView.Settings.AddCommandLineSwitch("lang", "en-US");
+        // Stops Chromium advertising navigator.webdriver / automation bits that
+        // Google's sign-in page treats as an insecure embedded browser.
+        WebView.Settings.AddCommandLineSwitch("disable-blink-features", "AutomationControlled");
+
+        if (OperatingSystem.IsLinux())
+        {
+            // Same VMware SVGA3D driver that forced software rendering for Avalonia
+            // itself (see Program.cs) also breaks CEF's hardware GL init.
+            WebView.Settings.AddCommandLineSwitch("disable-gpu", null);
+        }
+
+        WebView.Settings.AddCommandLineSwitch("no-sandbox", null);
+        // Out-of-process network/utility helpers crash-loop on this host
+        // ("Network service crashed, restarting service"), so pages never
+        // leave "Loading…". Single-process keeps I/O in this manifested exe.
+        WebView.Settings.AddCommandLineSwitch("single-process", null);
 
         var services = new ServiceCollection();
         services.AddSingleton<IDialogService, DialogService>();

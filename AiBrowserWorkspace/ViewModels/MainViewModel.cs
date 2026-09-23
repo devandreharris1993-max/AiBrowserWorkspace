@@ -3,14 +3,13 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using AiBrowserWorkspace.Commands;
+using AiBrowserWorkspace.Models;
 using AiBrowserWorkspace.Services;
 
 namespace AiBrowserWorkspace.ViewModels;
 
-// The dashboard: a left panel of session cards (browser + address bar, click to
-// select) and a right panel with the composer for whichever one is selected (see
-// Views/BrowserCard.axaml and Views/PromptPanel.axaml) — plus a broadcast panel that
-// fans one shared prompt out to every checked card at once, regardless of selection.
+// The dashboard: session cards (browser + address bar) and an optional broadcast
+// bar that fans one shared prompt out to every checked card.
 public sealed class MainViewModel : ViewModelBase
 {
     private readonly IBrowserSessionService _sessionService;
@@ -38,8 +37,7 @@ public sealed class MainViewModel : ViewModelBase
 
     public bool ShowEmptyState => Sessions.Count == 0;
 
-    // Drives the right-hand PromptPanel (its DataContext, via MainWindow.axaml) and
-    // each card's highlighted border (BrowserSessionViewModel.CardBorderBrush).
+    // Drives each card's highlighted border (BrowserSessionViewModel.CardBorderBrush).
     public BrowserSessionViewModel? SelectedSession
     {
         get => _selectedSession;
@@ -131,6 +129,14 @@ public sealed class MainViewModel : ViewModelBase
     public RelayCommand ToggleBroadcastPanelCommand { get; }
     public AsyncRelayCommand BroadcastCommand { get; }
 
+    public BrowserSessionViewModel AddSession(AiPlatform platform, string? requestedName = null, ProxyEndpoint? proxy = null)
+    {
+        var session = _sessionService.CreateSession(platform, requestedName, proxy);
+        Sessions.Add(session);
+        SelectedSession = session;
+        return session;
+    }
+
     private async Task AddBrowserFromDialogAsync()
     {
         var result = await _dialogService.ShowAddBrowserDialogAsync();
@@ -139,9 +145,7 @@ public sealed class MainViewModel : ViewModelBase
             return;
         }
 
-        var session = _sessionService.CreateSession(result.Platform, result.SessionName, result.Proxy);
-        Sessions.Add(session);
-        SelectedSession = session;
+        AddSession(result.Platform, result.SessionName, result.Proxy);
     }
 
     private Task RemoveBrowserAsync(object? parameter)

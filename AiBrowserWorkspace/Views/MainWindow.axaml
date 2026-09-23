@@ -9,7 +9,6 @@
 
     <Window.KeyBindings>
         <KeyBinding Gesture="Ctrl+N" Command="{Binding DataContext.AddBrowserCommand, ElementName=RootWindow}" />
-        <KeyBinding Gesture="Ctrl+Enter" Command="{Binding DataContext.SelectedSession.SendCommand, ElementName=RootWindow}" />
     </Window.KeyBindings>
 
     <Grid>
@@ -89,70 +88,55 @@
             </Grid>
         </Border>
 
-        <!-- Body -->
+        <!-- Body: session cards fill the window. Site-specific prompt injection
+             lives only in the Broadcast bar, not a side panel. -->
         <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" MinWidth="480" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="1*" MinWidth="360" MaxWidth="640" />
-            </Grid.ColumnDefinitions>
+            <ListBox x:Name="SessionsListBox" ItemsSource="{Binding Sessions}"
+                     SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
+                     Background="Transparent" BorderThickness="0" Padding="12"
+                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <ListBox.Styles>
+                    <Style Selector="ListBoxItem">
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="Template">
+                            <ControlTemplate>
+                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                            </ControlTemplate>
+                        </Setter>
+                    </Style>
+                </ListBox.Styles>
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <views:BrowserCard>
+                            <views:BrowserCard.Width>
+                                <MultiBinding Converter="{StaticResource ResponsiveCardWidth}">
+                                    <Binding ElementName="SessionsListBox" Path="Bounds.Width" />
+                                    <Binding ElementName="SessionsListBox" Path="ItemCount" />
+                                </MultiBinding>
+                            </views:BrowserCard.Width>
+                            <views:BrowserCard.Height>
+                                <Binding ElementName="SessionsListBox" Path="Bounds.Height"
+                                         Converter="{StaticResource ResponsiveCardHeight}" />
+                            </views:BrowserCard.Height>
+                        </views:BrowserCard>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
 
-            <!-- Left: sessions -->
-            <Grid Grid.Column="0">
-                <ListBox x:Name="SessionsListBox" ItemsSource="{Binding Sessions}"
-                         SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
-                         Background="Transparent" BorderThickness="0" Padding="12"
-                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto">
-                    <ListBox.Styles>
-                        <Style Selector="ListBoxItem">
-                            <Setter Property="Padding" Value="0" />
-                            <Setter Property="Template">
-                                <ControlTemplate>
-                                    <ContentPresenter Content="{TemplateBinding Content}"
-                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
-                                </ControlTemplate>
-                            </Setter>
-                        </Style>
-                    </ListBox.Styles>
-                    <ListBox.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel Orientation="Horizontal" />
-                        </ItemsPanelTemplate>
-                    </ListBox.ItemsPanel>
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <views:BrowserCard>
-                                <views:BrowserCard.Width>
-                                    <MultiBinding Converter="{StaticResource ResponsiveCardWidth}">
-                                        <Binding ElementName="SessionsListBox" Path="Bounds.Width" />
-                                        <Binding ElementName="SessionsListBox" Path="ItemCount" />
-                                    </MultiBinding>
-                                </views:BrowserCard.Width>
-                                <views:BrowserCard.Height>
-                                    <Binding ElementName="SessionsListBox" Path="Bounds.Height"
-                                             Converter="{StaticResource ResponsiveCardHeight}" />
-                                </views:BrowserCard.Height>
-                            </views:BrowserCard>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-
-                <!-- Empty state -->
-                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                            IsVisible="{Binding ShowEmptyState}">
-                    <TextBlock Text="No browser sessions yet" FontSize="16" Foreground="{StaticResource SecondaryTextBrush}"
-                               HorizontalAlignment="Center" />
-                    <TextBlock Text="Click “+ Add Browser” to open ChatGPT or Claude." FontSize="13"
-                               Foreground="{StaticResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
-                </StackPanel>
-            </Grid>
-
-            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch"
-                          Background="{StaticResource DividerBrush}" ResizeDirection="Columns" />
-
-            <!-- Right: prompt panel for the selected session -->
-            <views:PromptPanel Grid.Column="2" x:Name="PromptPanelControl" DataContext="{Binding SelectedSession}" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                        IsVisible="{Binding ShowEmptyState}">
+                <TextBlock Text="No browser sessions yet" FontSize="16" Foreground="{StaticResource SecondaryTextBrush}"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="Click “+ Add Browser” to open ChatGPT, Claude, or Clever AI Humanizer." FontSize="13"
+                           Foreground="{StaticResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>

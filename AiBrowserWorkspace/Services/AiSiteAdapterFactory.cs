@@ -13,7 +13,8 @@ public sealed class AiSiteAdapterFactory : IAiSiteAdapterFactory
     private readonly Dictionary<AiPlatform, IAiSiteAdapter> _adapters = new()
     {
         [AiPlatform.ChatGpt] = new ChatGptSiteAdapter(),
-        [AiPlatform.Claude] = new ClaudeSiteAdapter()
+        [AiPlatform.Claude] = new ClaudeSiteAdapter(),
+        [AiPlatform.CleverAiHumanizer] = new CleverAiHumanizerSiteAdapter()
     };
 
     public IAiSiteAdapter GetAdapter(AiPlatform platform)

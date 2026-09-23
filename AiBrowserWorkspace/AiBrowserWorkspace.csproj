@@ -8,7 +8,20 @@
     <RootNamespace>AiBrowserWorkspace</RootNamespace>
     <AssemblyName>AiBrowserWorkspace</AssemblyName>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
+
+  <!-- CEF resolves locales/ relative to libcef.dll (the app output dir), but
+       WebViewControl only copies them under CefGlueBrowserProcess/. Without
+       this copy, the first navigation can sit on a blank "Loading…" page. -->
+  <Target Name="CopyCefLocales" AfterTargets="Build">
+    <ItemGroup>
+      <CefLocaleFiles Include="$(OutputPath)CefGlueBrowserProcess\locales\*.pak" />
+    </ItemGroup>
+    <Copy SourceFiles="@(CefLocaleFiles)" DestinationFolder="$(OutputPath)locales" SkipUnchangedFiles="true" />
+    <Exec Condition="Exists('$(OutputPath)CefGlueBrowserProcess\Xilium.CefGlue.BrowserProcess.exe')"
+          Command="powershell -NoProfile -ExecutionPolicy Bypass -File &quot;$(MSBuildThisFileDirectory)..\tools\EmbedWinManifest.ps1&quot; -ExePath &quot;$(OutputPath)CefGlueBrowserProcess\Xilium.CefGlue.BrowserProcess.exe&quot; -ManifestPath &quot;$(MSBuildThisFileDirectory)app.manifest&quot;" />
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.10" />
