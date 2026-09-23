@@ -1,0 +1,158 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:AiBrowserWorkspace.Views"
+        x:Class="AiBrowserWorkspace.Views.MainWindow"
+        x:Name="RootWindow"
+        Title="AI Browser Workspace" Height="800" Width="1400"
+        MinHeight="560" MinWidth="900"
+        Background="{StaticResource AppBackgroundBrush}">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="Ctrl+N" Command="{Binding DataContext.AddBrowserCommand, ElementName=RootWindow}" />
+        <KeyBinding Gesture="Ctrl+Enter" Command="{Binding DataContext.SelectedSession.SendCommand, ElementName=RootWindow}" />
+    </Window.KeyBindings>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Top bar -->
+        <Border Grid.Row="0" Background="{StaticResource SurfaceBrush}" Padding="20,14"
+                BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="AI Browser Workspace" FontSize="18" FontWeight="Bold"
+                               Foreground="{StaticResource PrimaryTextBrush}" />
+                    <TextBlock Foreground="{StaticResource SecondaryTextBrush}" FontSize="13"
+                               VerticalAlignment="Center" Margin="10,0,0,0">
+                        <Run Text="·" />
+                        <Run Text="{Binding Sessions.Count}" />
+                        <Run Text="sessions" />
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="{Binding BroadcastToggleButtonLabel}" Classes="secondary"
+                            Command="{Binding ToggleBroadcastPanelCommand}" Margin="0,0,10,0" />
+                    <Button Content="+ Add Browser" Classes="primary"
+                            Command="{Binding AddBrowserCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Broadcast bar: compose one prompt and send it to every checked session at
+             once. Each card's checkbox controls whether it's a target. -->
+        <Border Grid.Row="1" Background="{StaticResource SurfaceBrush}" Padding="20,14"
+                BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1"
+                IsVisible="{Binding IsBroadcastPanelOpen}">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,Auto">
+                <TextBlock Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2"
+                           Text="Send one prompt to every session checked below" FontSize="12"
+                           Foreground="{StaticResource SecondaryTextBrush}" Margin="0,0,0,8" />
+
+                <Border Grid.Row="1" Grid.Column="0" CornerRadius="10" Background="{StaticResource EditorBackgroundBrush}"
+                        BorderBrush="{StaticResource DividerBrush}" BorderThickness="1" Margin="0,0,12,0"
+                        MinHeight="64" MaxHeight="140">
+                    <Grid>
+                        <TextBox Text="{Binding BroadcastPromptText}" AcceptsReturn="True" TextWrapping="Wrap"
+                                 Background="Transparent" BorderThickness="0" Foreground="{StaticResource PrimaryTextBrush}"
+                                 CaretBrush="{StaticResource PrimaryTextBrush}" SelectionBrush="{StaticResource AccentButtonBrush}"
+                                 FontSize="13" Padding="10" />
+                        <TextBlock Text="Write one prompt to send to every checked session…"
+                                   Foreground="{StaticResource PlaceholderTextBrush}" FontSize="13"
+                                   Margin="14,10,0,0" IsHitTestVisible="False"
+                                   IsVisible="{Binding BroadcastPromptIsEmpty}" />
+                    </Grid>
+                </Border>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Top" Width="150">
+                    <Button Content="{Binding BroadcastButtonLabel}" Classes="primary" HorizontalAlignment="Stretch"
+                            Command="{Binding BroadcastCommand}" />
+                    <TextBlock FontSize="11" Foreground="{StaticResource SecondaryTextBrush}"
+                               HorizontalAlignment="Center" Margin="0,6,0,0">
+                        <Run Text="{Binding BroadcastTargetCount}" />
+                        <Run Text=" of " />
+                        <Run Text="{Binding Sessions.Count}" />
+                        <Run Text=" selected" />
+                    </TextBlock>
+                </StackPanel>
+
+                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="{Binding BroadcastStatusMessage}"
+                           FontSize="12" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,8,0,0"
+                           TextWrapping="Wrap" IsVisible="{Binding HasBroadcastStatusMessage}" />
+            </Grid>
+        </Border>
+
+        <!-- Body -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" MinWidth="480" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="1*" MinWidth="360" MaxWidth="640" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: sessions -->
+            <Grid Grid.Column="0">
+                <ListBox x:Name="SessionsListBox" ItemsSource="{Binding Sessions}"
+                         SelectedItem="{Binding SelectedSession, Mode=TwoWay}"
+                         Background="Transparent" BorderThickness="0" Padding="12"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.Styles>
+                        <Style Selector="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Template">
+                                <ControlTemplate>
+                                    <ContentPresenter Content="{TemplateBinding Content}"
+                                                      ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                </ControlTemplate>
+                            </Setter>
+                        </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <views:BrowserCard>
+                                <views:BrowserCard.Width>
+                                    <MultiBinding Converter="{StaticResource ResponsiveCardWidth}">
+                                        <Binding ElementName="SessionsListBox" Path="Bounds.Width" />
+                                        <Binding ElementName="SessionsListBox" Path="ItemCount" />
+                                    </MultiBinding>
+                                </views:BrowserCard.Width>
+                                <views:BrowserCard.Height>
+                                    <Binding ElementName="SessionsListBox" Path="Bounds.Height"
+                                             Converter="{StaticResource ResponsiveCardHeight}" />
+                                </views:BrowserCard.Height>
+                            </views:BrowserCard>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+
+                <!-- Empty state -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding ShowEmptyState}">
+                    <TextBlock Text="No browser sessions yet" FontSize="16" Foreground="{StaticResource SecondaryTextBrush}"
+                               HorizontalAlignment="Center" />
+                    <TextBlock Text="Click “+ Add Browser” to open ChatGPT or Claude." FontSize="13"
+                               Foreground="{StaticResource SecondaryTextBrush}" HorizontalAlignment="Center" Margin="0,6,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch"
+                          Background="{StaticResource DividerBrush}" ResizeDirection="Columns" />
+
+            <!-- Right: prompt panel for the selected session -->
+            <views:PromptPanel Grid.Column="2" x:Name="PromptPanelControl" DataContext="{Binding SelectedSession}" />
+        </Grid>
+    </Grid>
+</Window>

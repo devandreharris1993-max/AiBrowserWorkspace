@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AiBrowserWorkspace.Views.AddBrowserDialog"
+        Title="Add Browser" Height="540" Width="380"
+        CanResize="False"
+        Background="{StaticResource SurfaceBrush}"
+        KeyDown="Window_KeyDown">
+    <Grid Margin="24" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,*,Auto">
+
+        <TextBlock Grid.Row="0" Text="Choose a platform" FontWeight="SemiBold" FontSize="14"
+                   Foreground="{StaticResource PrimaryTextBrush}" />
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,20">
+            <RadioButton Content="ChatGPT" GroupName="Platform" Margin="0,0,24,0"
+                         Foreground="{StaticResource PrimaryTextBrush}"
+                         IsChecked="{Binding SelectedPlatform, Converter={StaticResource EnumEquals}, ConverterParameter=ChatGpt}" />
+            <RadioButton Content="Claude" GroupName="Platform"
+                         Foreground="{StaticResource PrimaryTextBrush}"
+                         IsChecked="{Binding SelectedPlatform, Converter={StaticResource EnumEquals}, ConverterParameter=Claude}" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="2" Text="Session name (optional)" FontWeight="SemiBold" FontSize="14"
+                   Foreground="{StaticResource PrimaryTextBrush}" />
+
+        <TextBox Grid.Row="3" x:Name="SessionNameBox" Margin="0,10,0,0" Padding="10,8" FontSize="13"
+                 Background="{StaticResource EditorBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                 BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                 Text="{Binding SessionName}" />
+
+        <TextBlock Grid.Row="4" Text="Proxy (optional)" FontWeight="SemiBold" FontSize="14"
+                   Foreground="{StaticResource PrimaryTextBrush}" Margin="0,20,0,0" />
+
+        <TextBlock Grid.Row="5" Text="{Binding ProxyStatusText}" FontSize="11" TextWrapping="Wrap"
+                   Foreground="{StaticResource SecondaryTextBrush}" Margin="0,4,0,0" />
+
+        <Grid Grid.Row="6" ColumnDefinitions="2*,10,1*" Margin="0,10,0,0">
+            <TextBox Grid.Column="0" Watermark="Host (e.g. 10.0.0.5)" Padding="10,8" FontSize="13"
+                     Background="{StaticResource EditorBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                     Text="{Binding ProxyHost}" />
+            <TextBox Grid.Column="2" Watermark="Port" Padding="10,8" FontSize="13"
+                     Background="{StaticResource EditorBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                     Text="{Binding ProxyPortText}" />
+        </Grid>
+
+        <Grid Grid.Row="7" ColumnDefinitions="1*,10,1*" Margin="0,8,0,0">
+            <TextBox Grid.Column="0" Watermark="Username (if required)" Padding="10,8" FontSize="13"
+                     Background="{StaticResource EditorBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                     Text="{Binding ProxyUserName}" />
+            <TextBox Grid.Column="2" Watermark="Password" PasswordChar="•" Padding="10,8" FontSize="13"
+                     Background="{StaticResource EditorBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                     BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                     Text="{Binding ProxyPassword}" />
+        </Grid>
+
+        <TextBlock Grid.Row="8" Text="{Binding ValidationError}" FontSize="11" TextWrapping="Wrap"
+                   Foreground="{StaticResource ErrorTextBrush}" Margin="0,8,0,0"
+                   IsVisible="{Binding ValidationError, Converter={StaticResource NullToBool}}" />
+
+        <StackPanel Grid.Row="10" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Cancel" Classes="secondary" Margin="0,0,10,0" Click="OnCancelClick" />
+            <Button Content="Add Browser" Classes="primary" Click="OnAddClick" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -1,0 +1,110 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:AiBrowserWorkspace.Converters">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <!-- Palette -->
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#0F1115" />
+            <SolidColorBrush x:Key="SurfaceBrush" Color="#15171C" />
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#1B1E24" />
+            <SolidColorBrush x:Key="CardHeaderBrush" Color="#20232B" />
+            <SolidColorBrush x:Key="EditorBackgroundBrush" Color="#1A1D23" />
+            <SolidColorBrush x:Key="DividerBrush" Color="#262A33" />
+            <SolidColorBrush x:Key="PrimaryTextBrush" Color="#F5F6F8" />
+            <SolidColorBrush x:Key="SecondaryTextBrush" Color="#9AA0AC" />
+            <SolidColorBrush x:Key="PlaceholderTextBrush" Color="#5B6270" />
+            <SolidColorBrush x:Key="ErrorTextBrush" Color="#FF8A8A" />
+            <SolidColorBrush x:Key="ErrorBannerBrush" Color="#7A2A2A" />
+            <SolidColorBrush x:Key="AccentButtonBrush" Color="#5B8DEF" />
+            <SolidColorBrush x:Key="AccentButtonHoverBrush" Color="#7AA2F2" />
+            <SolidColorBrush x:Key="SecondaryHoverBrush" Color="#22FFFFFF" />
+            <SolidColorBrush x:Key="CloseHoverBrush" Color="#33E05A5A" />
+            <SolidColorBrush x:Key="CloseHoverTextBrush" Color="#FFE0A0A0" />
+
+            <!-- Converters -->
+            <converters:EnumToBooleanConverter x:Key="EnumEquals" />
+            <converters:ResponsiveCardWidthConverter x:Key="ResponsiveCardWidth" />
+            <converters:ResponsiveCardHeightConverter x:Key="ResponsiveCardHeight" />
+            <converters:NullToBoolConverter x:Key="NullToBool" />
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!-- Primary button -->
+    <Style Selector="Button.primary">
+        <Setter Property="Background" Value="{StaticResource AccentButtonBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.primary:pointerover /template/ Border">
+        <Setter Property="Background" Value="{StaticResource AccentButtonHoverBrush}" />
+    </Style>
+    <Style Selector="Button.primary:disabled">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <!-- Secondary (outline) button -->
+    <Style Selector="Button.secondary">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{StaticResource DividerBrush}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.secondary:pointerover /template/ Border">
+        <Setter Property="Background" Value="{StaticResource SecondaryHoverBrush}" />
+    </Style>
+    <Style Selector="Button.secondary:disabled">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+
+    <!-- Small round card close button -->
+    <Style Selector="Button.card-close">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Width" Value="22" />
+        <Setter Property="Height" Value="22" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="11">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Button.card-close:pointerover /template/ Border">
+        <Setter Property="Background" Value="{StaticResource CloseHoverBrush}" />
+    </Style>
+    <Style Selector="Button.card-close:pointerover">
+        <Setter Property="Foreground" Value="{StaticResource CloseHoverTextBrush}" />
+    </Style>
+
+</Styles>

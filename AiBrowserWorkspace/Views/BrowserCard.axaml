@@ -1,0 +1,82 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:wv="clr-namespace:WebViewControl;assembly=WebViewControl.Avalonia"
+             x:Class="AiBrowserWorkspace.Views.BrowserCard"
+             MinWidth="340" MinHeight="420"
+             Loaded="OnLoaded">
+    <Border CornerRadius="14"
+            Background="{StaticResource CardBackgroundBrush}"
+            BorderBrush="{Binding CardBorderBrush}"
+            BorderThickness="{Binding CardBorderThickness}"
+            Margin="8"
+            ClipToBounds="True">
+        <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- Header -->
+            <Border Grid.Row="0" Background="{StaticResource CardHeaderBrush}" Padding="14,10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="14"
+                                   Foreground="{StaticResource PrimaryTextBrush}" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Text="{Binding PlatformDisplayName}" FontSize="11" FontWeight="Medium"
+                                   Foreground="{Binding AccentBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <CheckBox IsChecked="{Binding IncludeInBroadcast, Mode=TwoWay}" VerticalAlignment="Center"
+                                  Margin="0,0,8,0" ToolTip.Tip="Include this session when broadcasting a prompt" />
+                        <Ellipse Width="10" Height="10" Fill="{Binding StatusBrush}"
+                                 VerticalAlignment="Center" ToolTip.Tip="{Binding StatusDisplayText}" Margin="0,0,10,0" />
+                        <Button Content="&#x2715;" Classes="card-close"
+                                ToolTip.Tip="Remove this browser"
+                                PointerPressed="CloseButton_PointerPressed"
+                                Command="{Binding DataContext.RemoveBrowserCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                CommandParameter="{Binding}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Address bar: lets this card browse anywhere, not just its starting platform -->
+            <Border Grid.Row="1" Background="{StaticResource EditorBackgroundBrush}" Padding="8,6"
+                    BorderBrush="{StaticResource DividerBrush}" BorderThickness="0,0,0,1">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*">
+                    <Button Grid.Column="0" Content="&#x2190;" Classes="card-close" Margin="0,0,2,0"
+                            ToolTip.Tip="Back" Click="BackButton_Click" />
+                    <Button Grid.Column="1" Content="&#x2192;" Classes="card-close" Margin="0,0,2,0"
+                            ToolTip.Tip="Forward" Click="ForwardButton_Click" />
+                    <Button Grid.Column="2" Content="&#x21bb;" Classes="card-close" Margin="0,0,6,0"
+                            ToolTip.Tip="Reload" Click="ReloadButton_Click" />
+                    <TextBox Grid.Column="3" x:Name="AddressBar"
+                             Background="{StaticResource CardBackgroundBrush}" Foreground="{StaticResource PrimaryTextBrush}"
+                             CaretBrush="{StaticResource PrimaryTextBrush}"
+                             BorderBrush="{StaticResource DividerBrush}" BorderThickness="1"
+                             CornerRadius="6" Padding="8,4" FontSize="12" VerticalContentAlignment="Center"
+                             KeyDown="AddressBar_KeyDown" />
+                </Grid>
+            </Border>
+
+            <!-- Browser content -->
+            <Grid Grid.Row="2">
+                <wv:WebView x:Name="WebViewControl" />
+
+                <Border Background="#CC15171C" IsVisible="{Binding IsLoadingOverlayVisible}">
+                    <TextBlock Text="{Binding StatusDisplayText}" Foreground="White" FontSize="13"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <Border Background="#E5241717" Padding="16" IsVisible="{Binding HasError}">
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Something went wrong" Foreground="White" FontWeight="SemiBold" FontSize="13"
+                                   HorizontalAlignment="Center" />
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#FFE0E0E0" FontSize="11"
+                                   TextWrapping="Wrap" TextAlignment="Center" Margin="0,6,0,0" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Footer -->
+            <Border Grid.Row="3" Padding="14,8" Background="{StaticResource CardHeaderBrush}">
+                <TextBlock Text="{Binding StatusDisplayText}" FontSize="11" Foreground="{StaticResource SecondaryTextBrush}" />
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>

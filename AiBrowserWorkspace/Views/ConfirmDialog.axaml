@@ -1,0 +1,16 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AiBrowserWorkspace.Views.ConfirmDialog"
+        Width="380" SizeToContent="Height"
+        CanResize="False"
+        Background="{StaticResource SurfaceBrush}"
+        KeyDown="Window_KeyDown">
+    <Grid Margin="24" RowDefinitions="Auto,Auto">
+        <TextBlock Grid.Row="0" x:Name="MessageText" FontSize="13"
+                   Foreground="{StaticResource PrimaryTextBrush}" TextWrapping="Wrap" />
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Cancel" Classes="secondary" Margin="0,0,10,0" Click="OnCancelClick" />
+            <Button Content="Remove" Classes="primary" Click="OnConfirmClick" />
+        </StackPanel>
+    </Grid>
+</Window>

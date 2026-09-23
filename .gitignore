@@ -1,0 +1,42 @@
+# Build
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+publish/
+artifacts/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.idea/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.fragment.lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test / coverage
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Local secrets
+*.pfx
+appsettings.*.local.json
+.env
+.env.*

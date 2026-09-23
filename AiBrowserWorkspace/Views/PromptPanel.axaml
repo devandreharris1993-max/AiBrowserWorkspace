@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="AiBrowserWorkspace.Views.PromptPanel">
+
+    <Grid Background="{StaticResource SurfaceBrush}">
+
+        <!-- Empty state: no session selected -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="260"
+                    IsVisible="{Binding Converter={StaticResource NullToBool}, ConverterParameter=Invert}">
+            <TextBlock Text="No browser selected" FontSize="16" Foreground="{StaticResource SecondaryTextBrush}"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+            <TextBlock Text="Select a browser card on the left, or click “+ Add Browser” above, to start writing a prompt."
+                       FontSize="13" Foreground="{StaticResource SecondaryTextBrush}" Margin="0,6,0,0"
+                       HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+        </StackPanel>
+
+        <!-- Prompt editor for the selected session -->
+        <Grid IsVisible="{Binding Converter={StaticResource NullToBool}}"
+              RowDefinitions="Auto,Auto,*,Auto">
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Margin="20,20,20,10">
+                <TextBlock Text="{Binding DisplayName}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource PrimaryTextBrush}"
+                           TextTrimming="CharacterEllipsis" />
+                <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                    <Border Background="{Binding AccentBrush}" CornerRadius="10" Padding="8,2">
+                        <TextBlock Text="{Binding PlatformDisplayName}" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="{Binding StatusDisplayText}" Foreground="{Binding StatusBrush}" FontSize="12"
+                               VerticalAlignment="Center" Margin="10,0,0,0" />
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Error banner -->
+            <Border Grid.Row="1" Background="{StaticResource ErrorBannerBrush}" CornerRadius="8" Padding="12,8" Margin="20,0,20,10"
+                    IsVisible="{Binding HasError}">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="White" FontSize="12" TextWrapping="Wrap" />
+            </Border>
+
+            <!-- Editor -->
+            <Border Grid.Row="2" Margin="20,0,20,10" CornerRadius="12" Background="{StaticResource EditorBackgroundBrush}"
+                    BorderBrush="{StaticResource DividerBrush}" BorderThickness="1">
+                <Grid>
+                    <TextBox x:Name="PromptTextBox"
+                             Text="{Binding PromptText}"
+                             AcceptsReturn="True" TextWrapping="Wrap"
+                             Background="{StaticResource EditorBackgroundBrush}" BorderThickness="0"
+                             Foreground="{StaticResource PrimaryTextBrush}"
+                             CaretBrush="{StaticResource PrimaryTextBrush}"
+                             SelectionBrush="{StaticResource AccentButtonBrush}"
+                             FontSize="14" Padding="14" />
+                    <TextBlock Text="Write your prompt here… (Ctrl+Enter to send)"
+                               Foreground="{StaticResource PlaceholderTextBrush}" FontSize="14"
+                               Margin="18,16,0,0" IsHitTestVisible="False"
+                               IsVisible="{Binding PromptIsEmpty}" />
+                </Grid>
+            </Border>
+
+            <!-- Footer actions -->
+            <Grid Grid.Row="3" Margin="20,0,20,20" ColumnDefinitions="*,Auto,Auto">
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Foreground="{StaticResource SecondaryTextBrush}" FontSize="12">
+                    <Run Text="{Binding CharacterCount}" />
+                    <Run Text=" characters" />
+                </TextBlock>
+                <Button Grid.Column="1" Content="Clear" Classes="secondary"
+                        Command="{Binding ClearCommand}" Margin="0,0,10,0" />
+                <Button Grid.Column="2" Content="{Binding SendButtonLabel}" Classes="primary"
+                        Command="{Binding SendCommand}" />
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
